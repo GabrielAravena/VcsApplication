@@ -60,7 +60,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
     private boolean enviar(String archivoString){
         Log.e("ARCHIVO", archivoString);
-        String url = "https://apimovil.daim.cl/api/EntregaBoleta";
+        String url = "https://apimovil.vrrd.cl/api/EntregaBoleta";
 
         try {
 

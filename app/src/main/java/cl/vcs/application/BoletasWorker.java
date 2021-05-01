@@ -124,7 +124,7 @@ public class BoletasWorker extends Worker {
 
             Log.e("JSON_BODY", jsonBody.toString());
 
-            String url = "https://example/api/EntregaBoleta";
+            String url = "https://apimovil.vrrd.cl/api/EntregaBoleta";
 
             HostnameVerifier hostnameVerifier = new HostnameVerifier() {
                 @Override

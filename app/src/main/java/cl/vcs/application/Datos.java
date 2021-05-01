@@ -101,9 +101,9 @@ public class Datos extends AppCompatActivity {
     int idTablaCarga = 0;
     boolean CheckMedidor = false;
 
-    private static String urlConjuntos = "https://example/api/Conjunto?Usuario=";
-    private static String urlDirecciones = "https://example/api/DireccionV2?Conjunto=";
-    private static String urlClaves = "https://example/api/Clave";
+    private static String urlConjuntos = "https://apimovil.vrrd.cl/api/Conjunto?Usuario=";
+    private static String urlDirecciones = "https://apimovil.vrrd.cl/api/DireccionV2?Conjunto=";
+    private static String urlClaves = "https://apimovil.vrrd.cl/api/Clave";
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
