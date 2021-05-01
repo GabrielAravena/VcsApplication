@@ -4,9 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
@@ -25,7 +27,7 @@ public class Botones extends AppCompatActivity {
 
         botonTomaEstado = (BootstrapButton) findViewById(R.id.buttonTomaEstado);
         botonEntregaBoleta = (BootstrapButton) findViewById(R.id.buttonEntregaBoleta);
-        //botonEnviarDocumentos = (BootstrapButton) findViewById(R.id.buttonEnviarDocumentos);
+        botonEnviarDocumentos = (BootstrapButton) findViewById(R.id.buttonEnviarDocumentos);
         botonCerrarSesion = (BootstrapButton) findViewById(R.id.buttonCerrarSesion);
 
         botonTomaEstado.setOnClickListener(new View.OnClickListener() {
@@ -46,12 +48,37 @@ public class Botones extends AppCompatActivity {
             }
         });
 
-        /*botonEnviarDocumentos.setOnClickListener(new View.OnClickListener() {
+        botonEnviarDocumentos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new EnviarArchivos().execute();
+                Context context = MyApplication.getAppContext();
+
+                String[] archivos = context.fileList();
+
+                if(archivos.length == 0){
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(Botones.this);
+                    alertDialog.setMessage("No hay documentos para enviar. Este ya se envío correctamente.")
+                            .setTitle("Envío de documento")
+                            .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            });
+                    alertDialog.show();
+                }else{
+                    new EnviarArchivos().execute();
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(Botones.this);
+                    alertDialog.setMessage("El documento se ha enviado correctamente.")
+                            .setTitle("Envío de documento")
+                            .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            });
+                    alertDialog.show();
+                }
             }
-        });*/
+        });
 
         botonCerrarSesion.setOnClickListener(new View.OnClickListener() {
             @Override

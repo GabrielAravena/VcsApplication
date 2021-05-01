@@ -42,7 +42,7 @@ public class BootReceiver extends BroadcastReceiver {
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         PackageManager.DONT_KILL_APP);
 
-                //Log.e("ALARMA", "Alarma creada!!!");
+                Log.e("ALARMA", "Alarma creada!!!");
                 AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
                 Intent intento = new Intent(context, BootReceiver.class);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intento, 0);
@@ -56,14 +56,14 @@ public class BootReceiver extends BroadcastReceiver {
                 // setRepeating() lets you specify a precise custom interval--in this case,
                 // 20 minutes.
 
-                //alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }else{
-                //Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
-                //new EnviarArchivos().execute();
+                Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
+                new EnviarArchivos().execute();
             }
         }else{
-            //Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
-            //new EnviarArchivos().execute();
+            Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
+            new EnviarArchivos().execute();
         }
     }
 }

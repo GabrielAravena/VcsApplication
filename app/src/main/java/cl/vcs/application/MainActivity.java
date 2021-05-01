@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         password = (BootstrapEditText) findViewById(R.id.password);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-        //setAlarm(getApplicationContext());
+        setAlarm(getApplicationContext());
         ingresar();
     }
 
@@ -59,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 2);
-        calendar.set(Calendar.MINUTE, 37);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             Connection connection = new Connection();
-            String response = connection.getConnection("https://example/api/Usuario?Usuario="+stringUsuario+"&Contrasena="+stringPassword);
+            String response = connection.getConnection("https://apimovil.vrrd.cl/api/Usuario?Usuario="+stringUsuario+"&Contrasena="+stringPassword);
             return response;
         }
         @SuppressLint("WrongConstant")

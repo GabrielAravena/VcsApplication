@@ -6,6 +6,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -37,14 +40,13 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
             Log.e("ELIMINAR_TXT", "No hay archivos");
         }else{
             for(String archivo : archivos){
-                if(archivo.equalsIgnoreCase("Toma_de_estado.txt")){
+                if(archivo.equalsIgnoreCase("Toma_de_estado.txt")) {
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Toma_de_estado.txt");
-                    if(enviar(fileToBase64(file))){
+                    if (enviar(fileToBase64(file))) {
                         file.delete();
                         Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
                     }
-
                 }else if(archivo.equalsIgnoreCase("Boletas.txt")){
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Boletas.txt");
@@ -59,10 +61,16 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
     }
 
     private boolean enviar(String archivoString){
-        Log.e("ARCHIVO", archivoString);
-        String url = "https://apimovil.daim.cl/api/EntregaBoleta";
+
+        String url = "https://apimovil.vrrd.cl/api/";
 
         try {
+
+            JSONObject jsonBody = new JSONObject();
+
+            jsonBody.put("documento", archivoString);
+
+            Log.e("JSON_ARCHIVO", jsonBody.toString());
 
             URL object = new URL(url);
 
@@ -84,7 +92,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
             httpsURLConnection.setRequestMethod("POST");
 
             DataOutputStream localDataOutputStream = new DataOutputStream(httpsURLConnection.getOutputStream());
-            localDataOutputStream.writeBytes(archivoString);
+            localDataOutputStream.writeBytes(jsonBody.toString());
             localDataOutputStream.flush();
             localDataOutputStream.close();
 
@@ -107,6 +115,8 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
         } catch (CertificateException e) {
             e.printStackTrace();
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return false;

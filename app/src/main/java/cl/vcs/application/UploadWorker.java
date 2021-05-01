@@ -146,9 +146,9 @@ public class UploadWorker extends Worker {
             jsonBody.put("ChekMedidor", checkMedidor);
             jsonBody.put("Imagenbase64", imagen);
 
-            Log.e("JSON_TOMA", jsonBody.toString().replaceAll("ñ", "n"));
+            Log.e("JSON_TOMA", jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N").replaceAll("Á", "A"));
 
-            String url = "https://example/api/TomaEstado";
+            String url = "https://apimovil.vrrd.cl/api/TomaEstad";
 
             HostnameVerifier hostnameVerifier = new HostnameVerifier() {
                 @Override
@@ -170,7 +170,7 @@ public class UploadWorker extends Worker {
             httpsURLConnection.setRequestMethod("POST");
 
             DataOutputStream localDataOutputStream = new DataOutputStream(httpsURLConnection.getOutputStream());
-            localDataOutputStream.writeBytes(jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N"));
+            localDataOutputStream.writeBytes(jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N").replaceAll("Á", "A"));
             localDataOutputStream.flush();
             localDataOutputStream.close();
 
