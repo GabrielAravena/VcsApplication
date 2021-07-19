@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,23 +37,42 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
         String[] archivos = context.fileList();
 
         if(archivos.length == 0){
-
             Log.e("ELIMINAR_TXT", "No hay archivos");
         }else{
             for(String archivo : archivos){
                 if(archivo.equalsIgnoreCase("Toma_de_estado.txt")) {
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Toma_de_estado.txt");
-                    if (enviar(fileToBase64(file))) {
-                        file.delete();
-                        Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
+
+                    StringBuilder stringBuilder = ArchivoTexto.leerArchivo(context, "Toma_de_estado.txt");
+
+                    try {
+                        JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                        JSONObject jsonObject = jsonArray.getJSONObject(0);
+                        String usuario = jsonObject.getString("Usuario");
+                        if (enviar(fileToBase64(file), "Toma_de_estado.txt", usuario)) {
+                            file.delete();
+                            Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }else if(archivo.equalsIgnoreCase("Boletas.txt")){
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Boletas.txt");
-                    if(enviar(fileToBase64(file))){
-                        file.delete();
-                        Log.e("ELIMINAR_TXT", "Archivo Boletas.txt eliminado");
+
+                    StringBuilder stringBuilder = ArchivoTexto.leerArchivo(context, "Boletas.txt");
+
+                    try {
+                        JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                        JSONObject jsonObject = jsonArray.getJSONObject(0);
+                        String usuario = jsonObject.getString("Usuario");
+                        if(enviar(fileToBase64(file), "Boletas.txt", usuario)){
+                            file.delete();
+                            Log.e("ELIMINAR_TXT", "Archivo Boletas.txt eliminado");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -60,7 +80,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
         return null;
     }
 
-    private boolean enviar(String archivoString){
+    private boolean enviar(String archivoString, String nombreArchivo, String usuario){
 
         String url = "https://apimovil.vrrd.cl/api/Archivo";
 
@@ -68,7 +88,9 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
             JSONObject jsonBody = new JSONObject();
 
-            jsonBody.put("documento", archivoString);
+            jsonBody.put("Usuario", usuario);
+            jsonBody.put("NombreDocumento", nombreArchivo);
+            jsonBody.put("Documento", archivoString);
 
             Log.e("JSON_ARCHIVO", jsonBody.toString());
 

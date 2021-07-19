@@ -53,9 +53,6 @@ public class BootReceiver extends BroadcastReceiver {
                 calendar.set(Calendar.HOUR_OF_DAY, 23);
                 calendar.set(Calendar.MINUTE, 59);
 
-                // setRepeating() lets you specify a precise custom interval--in this case,
-                // 20 minutes.
-
                 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }else{
                 Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");

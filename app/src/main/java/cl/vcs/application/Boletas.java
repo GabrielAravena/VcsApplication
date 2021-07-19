@@ -371,7 +371,7 @@ public class Boletas extends AppCompatActivity {
                                         longitud = (""+location.getLongitude());
                                         if(camposLlenos()){
                                             BoletasWorker.enviarDatos(datos(), Boletas.this);
-                                            //ArchivoTexto.guardar(Boletas.this, datosText(), "Boletas.txt");
+                                            ArchivoTexto.guardar(Boletas.this, datosText(), "Boletas.txt");
                                             setDatosSincronizacion();
                                             vaciarConMensaje();
                                         }
