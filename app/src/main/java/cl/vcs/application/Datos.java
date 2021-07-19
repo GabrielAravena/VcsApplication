@@ -136,7 +136,6 @@ public class Datos extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         customSearchableSpinner = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinner);
         customSearchableSpinnerText = (TextView) findViewById(R.id.spinner_item);
-        //botonEnviarArchivo = (BootstrapButton) findViewById(R.id.bootstrapButton6);
         sincronizacionText1 = (TextView) findViewById(R.id.sincronizacionText1);
         sincronizacionText2 = (TextView) findViewById(R.id.sincronizacionText2);
 
