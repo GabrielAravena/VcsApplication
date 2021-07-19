@@ -148,7 +148,7 @@ public class UploadWorker extends Worker {
 
             Log.e("JSON_TOMA", jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N").replaceAll("Á", "A"));
 
-            String url = "https://apimovil.vrrd.cl/api/TomaEstad";
+            String url = "https://apimovil.vrrd.cl/api/TomaEstado";
 
             HostnameVerifier hostnameVerifier = new HostnameVerifier() {
                 @Override
