@@ -788,7 +788,7 @@ public class Datos extends AppCompatActivity {
                 super.onPostExecute(response);
 
                 if (response != null) {
-                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceFirst("\"", "").replaceAll("\\\\", "");
+                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "");
 
                     try {
 
@@ -801,7 +801,7 @@ public class Datos extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
 
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                conjuntos[i] = jsonObject.getString("Nombre");
+                                conjuntos[i] = jsonObject.getString("Nombre").replaceAll("'", "\"");
 
                             }
                             dropDownConjuntos.setDropdownData(conjuntos);
@@ -814,6 +814,7 @@ public class Datos extends AppCompatActivity {
                         }
 
                     } catch (JSONException e) {
+                        Log.e("Error json", e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -839,7 +840,7 @@ public class Datos extends AppCompatActivity {
 
                 if (response != null) {
 
-                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
+                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
                     response = "[{'Calle':'Seleccione...'},"+response+"]";
 
                     try {
@@ -854,7 +855,7 @@ public class Datos extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
 
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                direcciones[i] = jsonObject.getString("Calle");
+                                direcciones[i] = jsonObject.getString("Calle").replaceAll("'", "\"");
                                 if(i > 0){
                                     consumoAnteriorList[i] = jsonObject.getString("LecturaAnt");
                                     medidorList[i] = jsonObject.getString("Serie");

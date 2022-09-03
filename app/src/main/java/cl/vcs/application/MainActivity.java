@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(response);
 
             if(response != null){
-                response = response.replaceAll("\"", "").replaceAll("\\\\", "");
+                response = response.replaceAll("[\\\\][\\\\][\"]", "'").replaceAll("\"", "").replaceAll("\\\\", "");
 
                 if(!response.trim().equals("null")){
                     progressBar.setVisibility(8);

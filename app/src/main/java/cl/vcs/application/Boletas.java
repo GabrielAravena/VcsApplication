@@ -701,7 +701,7 @@ public class Boletas extends AppCompatActivity {
             super.onPostExecute(response);
 
             if (response != null) {
-                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceFirst("\"", "").replaceAll("\\\\", "");
+                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "");
 
                 try {
 
@@ -714,7 +714,7 @@ public class Boletas extends AppCompatActivity {
                         for (int i = 0; i < jsonArray.length(); i++) {
 
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            conjuntos[i] = jsonObject.getString("Nombre");
+                            conjuntos[i] = jsonObject.getString("Nombre").replaceAll("'", "\"");
 
                         }
                         dropDownConjuntos.setDropdownData(conjuntos);
