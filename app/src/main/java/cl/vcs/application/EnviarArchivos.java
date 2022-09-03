@@ -82,7 +82,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
     private boolean enviar(String archivoString, String nombreArchivo, String usuario){
 
-        String url = "https://apimovil.vrrd.cl/api/Archivo";
+        String url = "https://test.vrrd.cl/api/Archivo";
 
         try {
 
