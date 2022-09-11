@@ -25,6 +25,7 @@ import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -59,7 +60,8 @@ import java.util.concurrent.ExecutionException;
 
 public class Boletas extends AppCompatActivity {
 
-    BootstrapDropDown dropDownConjuntos;
+    CustomSearchableSpinner customSearchableSpinnerComunas;
+    CustomSearchableSpinner customSearchableSpinnerConjuntos;
     RadioButton conConserje, sinConserje;
     CheckBox checkBoleta, checkFactura;
     BootstrapEditText cantidadBoletas, nombreRecibeBoletas, cantidadFacturas, rutFacturas, nombreRecibeFacturas;
@@ -69,15 +71,19 @@ public class Boletas extends AppCompatActivity {
     ProgressBar progressBar;
     TextView sincronizacionText1, sincronizacionText2;
 
-    String comuna;
+    String comunaSelected = "", idComunaSelected = "", conjuntoSelected = "";
+
+    String usuario;
     String[] conjuntos;
-    String conjuntosSelected = "";
+    String[] comunas;
+    String[] idsComunas;
     String recibe = "";
     String documento = "";
     String latitud = "";
     String longitud = "";
 
-    private static String urlConjuntos = "https://test.vrrd.cl/api/ConjuntoBoleta?Usuario=";
+    private static String urlComunas = "https://test.vrrd.cl/api/Comuna?Usuario=";
+    private static String urlConjuntos = "https://test.vrrd.cl/api/ConjuntoBoletaV2?Usuario=";
 
     static final int REQUEST_LOCATION_CODE = 2;
 
@@ -92,7 +98,8 @@ public class Boletas extends AppCompatActivity {
         setContentView(R.layout.activity_boletas);
 
         imageButton = (ImageButton) findViewById(R.id.imageButton);
-        dropDownConjuntos = (BootstrapDropDown) findViewById(R.id.bootstrapDropDown);
+        customSearchableSpinnerComunas = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerComunas);
+        customSearchableSpinnerConjuntos = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerConjuntos);
         tipoDocumentoText = (TextView) findViewById(R.id.tipoDocumentoText);
         conConserje = (RadioButton) findViewById(R.id.conConserje);
         sinConserje = (RadioButton) findViewById(R.id.sinConserje);
@@ -127,25 +134,50 @@ public class Boletas extends AppCompatActivity {
             }
         };
 
-        comuna = getIntent().getStringExtra("comuna");
+        usuario = getIntent().getStringExtra("usuario");
         progressBar.setVisibility(0);
         setDatosSincronizacion();
-        new Boletas.getConjuntos().execute(urlConjuntos + comuna);
+
+        new getComunas().execute(urlComunas + usuario);
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Boletas.this, Botones.class);
-                intent.putExtra("comuna", comuna);
+                intent.putExtra("usuario", usuario);
                 startActivity(intent);
             }
         });
 
-        dropDownConjuntos.setOnDropDownItemClickListener(new BootstrapDropDown.OnDropDownItemClickListener() {
+        customSearchableSpinnerComunas.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(ViewGroup parent, View v, int id) {
-                conjuntosSelected = (String) dropDownConjuntos.getDropdownData()[id];
-                dropDownConjuntos.setText(conjuntosSelected);
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                customSearchableSpinnerComunas.isSpinnerDialogOpen = false;
+                progressBar.setVisibility(0);
+                comunaSelected = comunas[i];
+                idComunaSelected = idsComunas[i];
+                new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                customSearchableSpinnerComunas.isSpinnerDialogOpen = false;
+            }
+        });
+
+        customSearchableSpinnerConjuntos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                customSearchableSpinnerConjuntos.isSpinnerDialogOpen = false;
+
+                if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
+                    conjuntoSelected = conjuntos[i];
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                customSearchableSpinnerConjuntos.isSpinnerDialogOpen = false;
             }
         });
 
@@ -252,22 +284,23 @@ public class Boletas extends AppCompatActivity {
         });
 
         if(savedInstanceState != null){
-            comuna = savedInstanceState.getString("comuna");
+            usuario = savedInstanceState.getString("usuario");
+            comunas = savedInstanceState.getStringArray("comunas");
             conjuntos = savedInstanceState.getStringArray("conjuntos");
-            conjuntosSelected = savedInstanceState.getString("conjuntosSelected");
-
             cantidadBoletas.setText(savedInstanceState.getString("cantidadBoletas"));
             nombreRecibeBoletas.setText(savedInstanceState.getString("nombreRecibeBoletas"));
             cantidadFacturas.setText(savedInstanceState.getString("cantidadFacturas"));
             rutFacturas.setText(savedInstanceState.getString("rutFacturas"));
             nombreRecibeFacturas.setText(savedInstanceState.getString("nombreRecibeFacturas"));
 
-            dropDownConjuntos.setDropdownData(conjuntos);
+            comunaSelected = savedInstanceState.getString("comunaSelected");
+            if(conjuntos != null){
+                customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, comunas));
+            }
 
-            if(!conjuntosSelected.equalsIgnoreCase("")){
-                dropDownConjuntos.setText(conjuntosSelected);
-            }else{
-                dropDownConjuntos.setText("Seleccione...");
+            conjuntoSelected = savedInstanceState.getString("conjuntoSelected");
+            if(conjuntos != null){
+                customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, conjuntos));
             }
 
             if(savedInstanceState.getBoolean("sinConserje")){
@@ -303,7 +336,7 @@ public class Boletas extends AppCompatActivity {
     @Override
     public void onBackPressed(){
         Intent intent = new Intent(Boletas.this, Botones.class);
-        intent.putExtra("comuna", comuna);
+        intent.putExtra("usuario", usuario);
         startActivity(intent);
     }
 
@@ -311,9 +344,9 @@ public class Boletas extends AppCompatActivity {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString("comuna", comuna);
+        outState.putString("usuario", usuario);
         outState.putStringArray("conjuntos", conjuntos);
-        outState.putString("conjuntosSelected", conjuntosSelected);
+        outState.putString("conjuntoSelected", conjuntoSelected);
         outState.putBoolean("conConserje", conConserje.isChecked());
         outState.putBoolean("sinConserje", sinConserje.isChecked());
         outState.putBoolean("checkBoleta", checkBoleta.isChecked());
@@ -417,13 +450,13 @@ public class Boletas extends AppCompatActivity {
 
     private Data datos() {
         return new Data.Builder()
-                .putString("Conjunto", conjuntosSelected)
+                .putString("Conjunto", conjuntoSelected)
                 .putString("CantidadBoletas", cantidadBoletas.getText().toString())
                 .putString("NombreBoletas", nombreRecibeBoletas.getText().toString())
                 .putString("CantidadFacturas", cantidadFacturas.getText().toString())
                 .putString("RutFacturas", rutFacturas.getText().toString())
                 .putString("NombreFacturas", nombreRecibeFacturas.getText().toString())
-                .putString("Cliente", comuna)
+                .putString("Cliente", usuario)
                 .putString("Latitud", latitud)
                 .putString("Longitud", longitud)
                 .putString("recibe", recibe)
@@ -436,13 +469,13 @@ public class Boletas extends AppCompatActivity {
         JSONObject jsonBody = new JSONObject();
 
         try {
-            jsonBody.put("Conjunto", conjuntosSelected);
+            jsonBody.put("Conjunto", conjuntoSelected);
             jsonBody.put("CantidadBoleta", cantidadBoletas.getText().toString());
             jsonBody.put("NombreBoleta", nombreRecibeBoletas.getText().toString());
             jsonBody.put("CantidadFactura", cantidadFacturas.getText().toString());
             jsonBody.put("Rut", rutFacturas.getText().toString());
             jsonBody.put("NombreFactura", nombreRecibeFacturas.getText().toString());
-            jsonBody.put("Usuario", comuna);
+            jsonBody.put("Usuario", usuario);
             jsonBody.put("Latitud", latitud);
             jsonBody.put("Longitud", longitud);
             jsonBody.put("recibe", recibe);
@@ -457,10 +490,10 @@ public class Boletas extends AppCompatActivity {
     private void vaciarConMensaje() {
         progressBar.setVisibility(View.VISIBLE);
 
-        eliminarConjunto(conjuntosSelected);
+        eliminarConjunto(conjuntoSelected);
 
-        dropDownConjuntos.setText("Seleccione...");
-        conjuntosSelected = "";
+        conjuntoSelected = "";
+        customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, conjuntos));
 
         cantidadBoletas.setText("");
         nombreRecibeBoletas.setText("");
@@ -496,8 +529,7 @@ public class Boletas extends AppCompatActivity {
         latitud = "";
         longitud = "";
 
-        //new getConjuntos().execute(urlConjuntos+comuna);
-        //new getDirecciones().execute(urlDirecciones + dropDown3Selected + "&Usuario=" + comuna);
+        new getConjuntos().execute(urlConjuntos + usuario);
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(Boletas.this);
         alertDialog.setMessage("Los datos se han guardado correctamente.")
@@ -513,20 +545,20 @@ public class Boletas extends AppCompatActivity {
 
     }
 
-    private void eliminarConjunto(String conjuntosSelected) {
+    private void eliminarConjunto(String conjuntoSelected) {
         if(conjuntos.length > 1){
             int newLength = conjuntos.length - 1;
             String[] auxConjuntos = new String[newLength];
 
             int j = 0;
             for(int i=0; i < conjuntos.length; i++){
-                if(!conjuntos[i].equalsIgnoreCase(conjuntosSelected)){
+                if(!conjuntos[i].equalsIgnoreCase(conjuntoSelected)){
                     auxConjuntos[j] = conjuntos[i];
                     j++;
                 }
             }
             conjuntos = auxConjuntos;
-            dropDownConjuntos.setDropdownData(conjuntos);
+            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, conjuntos));
 
         }else{
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Boletas.this);
@@ -542,14 +574,26 @@ public class Boletas extends AppCompatActivity {
 
             String[] nulo = new String[1];
             nulo[0] = "No existen más conjuntos";
-            dropDownConjuntos.setDropdownData(nulo);
+            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, nulo));
         }
     }
 
     private boolean camposLlenos() {
-        if (conjuntosSelected.trim().equalsIgnoreCase("") || conjuntosSelected.trim().equalsIgnoreCase("Usuario sin conjuntos")) {
+        if (comunaSelected.trim().equalsIgnoreCase("") || comunaSelected.trim().equalsIgnoreCase("Usuario sin comunas") || comunaSelected.trim().equalsIgnoreCase("Seleccione...")) {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Boletas.this);
-            alertDialog.setMessage("Debe seleccionar conjunto.")
+            alertDialog.setMessage("Debe seleccionar una comuna")
+                    .setTitle("Alerta")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+            alertDialog.show();
+            return false;
+        } else if (conjuntoSelected.trim().equalsIgnoreCase("") || conjuntoSelected.trim().equalsIgnoreCase("Usuario sin conjuntos") || conjuntoSelected.trim().equalsIgnoreCase("Seleccione...")) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Boletas.this);
+            alertDialog.setMessage("Debe seleccionar un conjunto.")
                     .setTitle("Alerta")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
@@ -686,13 +730,12 @@ public class Boletas extends AppCompatActivity {
         return true;
     }
 
-    private class getConjuntos extends AsyncTask<String, String, String> {
+    private class getComunas extends AsyncTask<String, String, String> {
 
         @Override
         protected String doInBackground(String... strings) {
             Connection connection = new Connection();
             String jsonString = connection.getConnection(strings[0]);
-
             return jsonString;
         }
 
@@ -701,35 +744,85 @@ public class Boletas extends AppCompatActivity {
             super.onPostExecute(response);
 
             if (response != null) {
-                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "");
 
+                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
+                response = "[{'IDUsuarioPerfil':'0', 'Com_Reg':'Seleccione...'},"+response+"]";
                 try {
-
                     JSONArray jsonArray = new JSONArray(response);
 
-                    if (jsonArray.length() > 0) {
-
-                        conjuntos = new String[jsonArray.length()];
+                    if (jsonArray.length() > 1) {
+                        comunas = new String[jsonArray.length()];
+                        idsComunas = new String[jsonArray.length()];
 
                         for (int i = 0; i < jsonArray.length(); i++) {
 
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            conjuntos[i] = jsonObject.getString("Nombre").replaceAll("'", "\"");
-
+                            comunas[i] = jsonObject.getString("Com_Reg").replaceAll("'", "\"");
+                            idsComunas[i] = jsonObject.getString("IDUsuarioPerfil").replaceAll("'", "\"");
                         }
-                        dropDownConjuntos.setDropdownData(conjuntos);
+                        customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, comunas));
                     } else {
-
                         String[] nulo = new String[1];
-                        nulo[0] = "Usuario sin conjuntos";
-                        dropDownConjuntos.setDropdownData(nulo);
-
+                        nulo[0] = "No hay comunas";
+                        customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, nulo));
                     }
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            } else {
+                Toast.makeText(Boletas.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
+            }
+            progressBar.setVisibility(8);
+        }
+    }
 
+    private class getConjuntos extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Connection connection = new Connection();
+            String jsonString = connection.getConnection(strings[0]);
+            return jsonString;
+        }
+
+        @SuppressLint("WrongConstant")
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
+
+            if (response != null) {
+                if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
+                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
+                    response = "[{'Nombre':'Seleccione...'},"+response+"]";
+                    try {
+
+                        JSONArray jsonArray = new JSONArray(response);
+
+                        if (jsonArray.length() > 0) {
+
+                            conjuntos = new String[jsonArray.length()];
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                conjuntos[i] = jsonObject.getString("Nombre").replaceAll("'", "\"");
+                            }
+                            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, conjuntos));
+                        } else {
+
+                            String[] nulo = new String[1];
+                            nulo[0] = "Usuario sin conjuntos";
+                            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, nulo));
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    String[] nulo = new String[1];
+                    nulo[0] = "Seleccione...";
+                    customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Boletas.this, R.layout.spinner_item, nulo));
+                    conjuntoSelected = "";
+                }
             } else {
                 Toast.makeText(Boletas.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }

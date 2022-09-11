@@ -28,6 +28,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -70,8 +71,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class Datos extends AppCompatActivity {
-    BootstrapDropDown dropDownClaves, dropDownConjuntos;
-    CustomSearchableSpinner customSearchableSpinner;
+    CustomSearchableSpinner customSearchableSpinnerComunas;
+    CustomSearchableSpinner customSearchableSpinnerConjuntos;
+    CustomSearchableSpinner customSearchableSpinnerDirecciones;
+    CustomSearchableSpinner customSearchableSpinnerClaves;
     BootstrapWell bootstrapWell;
     BootstrapButton bootstrapButton3, botonFoto, bootstrapButton4, bootstrapButton5;
     BootstrapEditText consumoActual;
@@ -79,7 +82,7 @@ public class Datos extends AppCompatActivity {
     ImageView imageView;
     ProgressBar progressBar;
     String latitud = "", longitud = "";
-    String dropDown1Selected = "", dropDown2Selected = "", dropDown3Selected = "";
+    String direccionSelected = "", claveSelected = "", comunaSelected = "", idComunaSelected = "", conjuntoSelected = "";
     String currentPhotoPath = "";
     TextView medidor;
     TextView consumoAnterior;
@@ -89,7 +92,9 @@ public class Datos extends AppCompatActivity {
     CheckBox checkBox;
     Bitmap bitmapImage = null;
     String imageFileName = "";
-    String comuna = "";
+    String usuario = "";
+    String[] comunas;
+    String[] idsComunas;
     String[] conjuntos;
     String[] direcciones;
     String[] claves;
@@ -101,7 +106,8 @@ public class Datos extends AppCompatActivity {
     int idTablaCarga = 0;
     boolean CheckMedidor = false;
 
-    private static String urlConjuntos = "https://test.vrrd.cl/api/Conjunto?Usuario=";
+    private static String urlComunas = "https://test.vrrd.cl/api/Comuna?Usuario=";
+    private static String urlConjuntos = "https://test.vrrd.cl/api/ConjuntoComuna?Usuario=";
     private static String urlDirecciones = "https://test.vrrd.cl/api/DireccionV2?Conjunto=";
     private static String urlClaves = "https://test.vrrd.cl/api/Clave";
 
@@ -121,8 +127,6 @@ public class Datos extends AppCompatActivity {
 
         imageButton = (ImageButton) findViewById(R.id.imageButton);
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
-        dropDownClaves = (BootstrapDropDown) findViewById(R.id.bootstrapDropDown2);
-        dropDownConjuntos = (BootstrapDropDown) findViewById(R.id.bootstrapDropDown3);
         bootstrapWell = (BootstrapWell) findViewById(R.id.bootstrapWell);
         bootstrapButton3 = (BootstrapButton) findViewById(R.id.bootstrapButton3);
         imageView = (ImageView) findViewById(R.id.imageView);
@@ -134,16 +138,19 @@ public class Datos extends AppCompatActivity {
         consumoActual = (BootstrapEditText) findViewById(R.id.consumoActual);
         consumoActualText = (TextView) findViewById(R.id.textView6);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
-        customSearchableSpinner = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinner);
+        customSearchableSpinnerComunas = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerComunas);
+        customSearchableSpinnerConjuntos = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerConjuntos);
+        customSearchableSpinnerDirecciones = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerDirecciones);
+        customSearchableSpinnerClaves = (CustomSearchableSpinner) findViewById(R.id.customSearchableSpinnerClaves);
         customSearchableSpinnerText = (TextView) findViewById(R.id.spinner_item);
         sincronizacionText1 = (TextView) findViewById(R.id.sincronizacionText1);
         sincronizacionText2 = (TextView) findViewById(R.id.sincronizacionText2);
 
-        comuna = getIntent().getStringExtra("comuna");
+        usuario = getIntent().getStringExtra("usuario");
         progressBar.setVisibility(0);
-        new getConjuntos().execute(urlConjuntos + comuna);
-        new getClaves().execute(urlClaves);
 
+        new getComunas().execute(urlComunas + usuario);
+        new getClaves().execute(urlClaves);
         setDatosSincronizacion();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -165,57 +172,87 @@ public class Datos extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Datos.this, Botones.class);
-                intent.putExtra("comuna", comuna);
+                intent.putExtra("usuario", usuario);
                 startActivity(intent);
             }
         });
 
-        dropDownConjuntos.setOnDropDownItemClickListener(new BootstrapDropDown.OnDropDownItemClickListener() {
+        customSearchableSpinnerComunas.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(ViewGroup parent, View v, int id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                customSearchableSpinnerComunas.isSpinnerDialogOpen = false;
                 progressBar.setVisibility(0);
                 vaciar();
-                dropDown3Selected = (String) dropDownConjuntos.getDropdownData()[id];
-                dropDownConjuntos.setText(dropDown3Selected);
-                new getDirecciones().execute(urlDirecciones + dropDown3Selected + "&Usuario=" + comuna);
+                comunaSelected = comunas[i];
+                idComunaSelected = idsComunas[i];
+                new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                customSearchableSpinnerComunas.isSpinnerDialogOpen = false;
             }
         });
 
-        customSearchableSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        customSearchableSpinnerConjuntos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
-                customSearchableSpinner.isSpinnerDialogOpen = false;
+                customSearchableSpinnerConjuntos.isSpinnerDialogOpen = false;
 
-                if(consumoAnteriorList != null){
-                    dropDown1Selected = direcciones[i];
-                    consumoAnterior.setText(consumoAnteriorList[i]);
-                    medidor.setText(medidorList[i]);
-                    idTablaCarga = idTablaCargaList[i];
+                if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
+                    progressBar.setVisibility(0);
+                    conjuntoSelected = conjuntos[i];
+                    new getDirecciones().execute(urlDirecciones + conjuntoSelected + "&Usuario=" + usuario);
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                customSearchableSpinner.isSpinnerDialogOpen = false;
-
+                customSearchableSpinnerConjuntos.isSpinnerDialogOpen = false;
             }
         });
 
-        dropDownClaves.setOnDropDownItemClickListener(new BootstrapDropDown.OnDropDownItemClickListener() {
+        customSearchableSpinnerDirecciones.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(ViewGroup parent, View v, int id) {
-                dropDown2Selected = (String) dropDownClaves.getDropdownData()[id];
-                dropDownClaves.setText(dropDown2Selected);
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                customSearchableSpinnerDirecciones.isSpinnerDialogOpen = false;
 
-                if (dropDown2Selected.trim().equalsIgnoreCase("") || dropDown2Selected.trim().equalsIgnoreCase("No se han cargado los datos") || dropDown2Selected.trim().equalsIgnoreCase("No hay direcciones para este conjunto") || dropDown2Selected.trim().equalsIgnoreCase("Seleccione...")) {
+                if(!conjuntoSelected.trim().equalsIgnoreCase("") && !conjuntoSelected.trim().equalsIgnoreCase("Seleccione...")){
+                    if(consumoAnteriorList != null){
+                        direccionSelected = direcciones[i];
+                        consumoAnterior.setText(consumoAnteriorList[i]);
+                        medidor.setText(medidorList[i]);
+                        idTablaCarga = idTablaCargaList[i];
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                customSearchableSpinnerDirecciones.isSpinnerDialogOpen = false;
+            }
+        });
+
+        customSearchableSpinnerClaves.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                customSearchableSpinnerClaves.isSpinnerDialogOpen = false;
+
+                claveSelected = claves[i];
+                if (claveSelected.trim().equalsIgnoreCase("") || claveSelected.trim().equalsIgnoreCase("No se han cargado los datos") || claveSelected.trim().equalsIgnoreCase("No hay direcciones para este conjunto") || claveSelected.trim().equalsIgnoreCase("Seleccione...")) {
                     consumoActual.setVisibility(View.VISIBLE);
                     consumoActualText.setVisibility(View.VISIBLE);
                     clave = "";
                 }else{
                     consumoActual.setVisibility(View.GONE);
                     consumoActualText.setVisibility(View.GONE);
-                    clave = idClaves[id];
+                    clave = idClaves[i];
                 }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                customSearchableSpinnerClaves.isSpinnerDialogOpen = false;
             }
         });
 
@@ -276,9 +313,8 @@ public class Datos extends AppCompatActivity {
             public void onClick(View view) {
                 progressBar.setVisibility(0);
                 vaciar();
-                new getConjuntos().execute(urlConjuntos + comuna);
+                new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
                 setDatosSincronizacion();
-                //new getDirecciones().execute(urlDirecciones + dropDown3Selected + "&Usuario=" + comuna);
             }
         });
 
@@ -294,7 +330,10 @@ public class Datos extends AppCompatActivity {
                     });
             alertDialog.show();
 
-            comuna = savedInstanceState.getString("comuna");
+            usuario = savedInstanceState.getString("usuario");
+            comunas = savedInstanceState.getStringArray("comunas");
+            idsComunas = savedInstanceState.getStringArray("idsComunas");
+            idComunaSelected = savedInstanceState.getString("idComunaSelected");
             conjuntos = savedInstanceState.getStringArray("conjuntos");
             direcciones = savedInstanceState.getStringArray("direcciones");
             claves = savedInstanceState.getStringArray("claves");
@@ -306,25 +345,24 @@ public class Datos extends AppCompatActivity {
             idTablaCarga = savedInstanceState.getInt("idTablaCarga");
             CheckMedidor = savedInstanceState.getBoolean("CheckMedidor");
 
-            dropDown3Selected = savedInstanceState.getString("dropDown3Selected");
-            dropDownConjuntos.setDropdownData(conjuntos);
-            if(!dropDown3Selected.equalsIgnoreCase("")){
-                dropDownConjuntos.setText(dropDown3Selected);
-            }else{
-                dropDownConjuntos.setText("Seleccione...");
+            comunaSelected = savedInstanceState.getString("comunaSelected");
+            if(conjuntos != null){
+                customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, comunas));
             }
 
-            dropDown1Selected = savedInstanceState.getString("dropDown1Selected");
+            conjuntoSelected = savedInstanceState.getString("conjuntoSelected");
+            if(conjuntos != null){
+                customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, conjuntos));
+            }
+
+            direccionSelected = savedInstanceState.getString("direccionSelected");
             if(direcciones != null){
-                customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
+                customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
             }
 
-            dropDown2Selected = savedInstanceState.getString("dropDown2Selected");
-            dropDownClaves.setDropdownData(claves);
-            if(!dropDown2Selected.equalsIgnoreCase("")){
-                dropDownClaves.setText(dropDown2Selected);
-            }else{
-                dropDownClaves.setText("Seleccione...");
+            claveSelected = savedInstanceState.getString("claveSelected");
+            if(claves != null){
+                customSearchableSpinnerClaves.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, claves));
             }
 
             medidor.setText(savedInstanceState.getString("medidor"));
@@ -342,13 +380,13 @@ public class Datos extends AppCompatActivity {
 
         try {
             jsonBody.put("IDTablaCarga", idTablaCarga);
-            jsonBody.put("Usuario", comuna);
+            jsonBody.put("Usuario", usuario);
             jsonBody.put("Consumo", consumoActual.getText().toString());
             jsonBody.put("ConsumoAnterior", consumoAnterior.getText().toString());
             jsonBody.put("Medidor", medidor.getText().toString());
             jsonBody.put("Clave", clave);
-            jsonBody.put("Cliente", comuna);
-            jsonBody.put("Conjunto", dropDown3Selected);
+            jsonBody.put("Cliente", usuario);
+            jsonBody.put("Conjunto", conjuntoSelected);
             jsonBody.put("Latitud", latitud);
             jsonBody.put("Longitud", longitud);
             jsonBody.put("RutaImagen", imageFileName + ".jpg");
@@ -366,7 +404,10 @@ public class Datos extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString("comuna", comuna);
+        outState.putString("usuario", usuario);
+        outState.putStringArray("comunas", comunas);
+        outState.putStringArray("idsComunas", idsComunas);
+        outState.putString("idComunaSelected", idComunaSelected);
         outState.putStringArray("conjuntos", conjuntos);
         outState.putStringArray("direcciones", direcciones);
         outState.putStringArray("claves", claves);
@@ -378,22 +419,22 @@ public class Datos extends AppCompatActivity {
         outState.putInt("idTablaCarga", idTablaCarga);
         outState.putBoolean("CheckMedidor", CheckMedidor);
 
-        outState.putString("dropDown3Selected", dropDown3Selected);
-        outState.putString("dropDown1Selected", dropDown1Selected);
-        outState.putString("dropDown2Selected", dropDown2Selected);
+        outState.putString("comunaSelected", comunaSelected);
+        outState.putString("conjuntoSelected", conjuntoSelected);
+        outState.putString("direccionSelected", direccionSelected);
+        outState.putString("claveSelected", claveSelected);
 
         outState.putString("consumoActual", consumoActual.getText().toString());
         outState.putString("consumoAnterior", consumoAnterior.getText().toString());
         outState.putString("medidor", medidor.getText().toString());
 
         outState.putInt("consumoVisibility", consumoActual.getVisibility());
-
     }
 
     @Override
     public void onBackPressed(){
         Intent intent = new Intent(Datos.this, Botones.class);
-        intent.putExtra("comuna", comuna);
+        intent.putExtra("usuario", usuario);
         startActivity(intent);
     }
 
@@ -543,139 +584,32 @@ public class Datos extends AppCompatActivity {
         }
     }
 
-        private Data datos () {
+    private Data datos () {
 
-            return new Data.Builder()
-                    .putInt("IDTablaCarga", idTablaCarga)
-                    .putString("Usuario", comuna)
-                    .putString("Consumo", consumoActual.getText().toString())
-                    .putString("ConsumoAnterior", consumoAnterior.getText().toString())
-                    .putString("Medidor", medidor.getText().toString())
-                    .putString("Clave", clave)
-                    .putString("Cliente", comuna)
-                    .putString("Conjunto", dropDown3Selected)
-                    .putString("Latitud", latitud)
-                    .putString("Longitud", longitud)
-                    .putString("RutaImagen", imageFileName)
-                    .putString("NombreImagen", imageFileName)
-                    .putBoolean("checkMedidor", CheckMedidor)
-                    .putString("currentPhotoPath", currentPhotoPath)
-                    .build();
-        }
+        return new Data.Builder()
+                .putInt("IDTablaCarga", idTablaCarga)
+                .putString("Usuario", usuario)
+                .putString("Consumo", consumoActual.getText().toString())
+                .putString("ConsumoAnterior", consumoAnterior.getText().toString())
+                .putString("Medidor", medidor.getText().toString())
+                .putString("Clave", clave)
+                .putString("Cliente", usuario)
+                .putString("Conjunto", conjuntoSelected)
+                .putString("Latitud", latitud)
+                .putString("Longitud", longitud)
+                .putString("RutaImagen", imageFileName)
+                .putString("NombreImagen", imageFileName)
+                .putBoolean("checkMedidor", CheckMedidor)
+                .putString("currentPhotoPath", currentPhotoPath)
+                .build();
+    }
 
-        private boolean camposLlenos () {
+    private boolean camposLlenos () {
 
-            if (dropDown3Selected.trim().equalsIgnoreCase("") || dropDown3Selected.trim().equalsIgnoreCase("Usuario sin conjuntos") || dropDown3Selected.trim().equalsIgnoreCase("No hay direcciones para este conjunto")) {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
-                alertDialog.setMessage("Debe seleccionar conjunto.")
-                        .setTitle("Alerta")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                alertDialog.show();
-                return false;
-            } else if (dropDown1Selected.trim().equalsIgnoreCase("") || dropDown1Selected.trim().equalsIgnoreCase("No se han cargado los datos") || dropDown1Selected.trim().equalsIgnoreCase("No hay direcciones para este conjunto") || dropDown1Selected.trim().equalsIgnoreCase("Seleccione...")) {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
-                alertDialog.setMessage("Debe seleccionar dirección.")
-                        .setTitle("Alerta")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                alertDialog.show();
-                return false;
-            } else if (medidor.getText().toString().trim().equalsIgnoreCase("")) {
-                medidor.setError("No se ha cargado información");
-                return false;
-            } else if (consumoAnterior.getText().toString().trim().equalsIgnoreCase("")) {
-                consumoAnterior.setError("No se ha cargado información");
-                return false;
-            } else if (consumoActual.getText().toString().trim().equalsIgnoreCase("") && consumoActual.getVisibility() == View.VISIBLE) {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
-                alertDialog.setMessage("Debe ingresar el consumo actual.")
-                        .setTitle("Alerta")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                alertDialog.show();
-                return false;
-            } else if (bitmapImage == null) {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
-                alertDialog.setMessage("Debe tomar una foto.")
-                        .setTitle("Alerta")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                alertDialog.show();
-                return false;
-            } else if (latitud.trim().equalsIgnoreCase("")) {
-                Toast.makeText(this, "Espere un momento a que se cargue la geoposición", Toast.LENGTH_SHORT).show();
-                return false;
-            } else if (longitud.trim().equalsIgnoreCase("")) {
-                Toast.makeText(this, "Espere un momento a que se cargue la geoposición", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            if(consumoActual.getVisibility() == View.GONE){
-                consumoActual.setText("");
-            }
-
-            if(checkBox.isChecked()){
-                CheckMedidor = true;
-            }
-
-            return true;
-        }
-
-        @SuppressLint("WrongConstant")
-        private void vaciarConMensaje () {
-            progressBar.setVisibility(0);
-
-            eliminarDireccion(idTablaCarga);
-
-            idTablaCarga = 0;
-
-            dropDown1Selected = "";
-
-            dropDown2Selected = "";
-            clave = "";
-            dropDownClaves.setText("Seleccione...");
-
-            medidor.setText("");
-            consumoAnterior.setText("");
-            consumoActual.setText("");
-            currentPhotoPath = "";
-            imageFileName = "";
-            latitud = "";
-            longitud = "";
-            CheckMedidor = false;
-            if(checkBox.isChecked()){
-                checkBox.toggle();
-            }
-            if(consumoActual.getVisibility() == View.GONE){
-                consumoActual.setVisibility(View.VISIBLE);
-                consumoActualText.setVisibility(View.VISIBLE);
-            }
-            bitmapImage = null;
-            imageView.setImageBitmap(null);
-
-            new getConjuntos().execute(urlConjuntos+comuna);
-            //new getDirecciones().execute(urlDirecciones + dropDown3Selected + "&Usuario=" + comuna);
-
+        if (comunaSelected.trim().equalsIgnoreCase("") || comunaSelected.trim().equalsIgnoreCase("No hay comunas") || comunaSelected.trim().equalsIgnoreCase("Seleccione...")) {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
-            alertDialog.setMessage("Los datos se han guardado correctamente.")
-                    .setTitle("Datos ingresados")
+            alertDialog.setMessage("Debe seleccionar una comuna.")
+                    .setTitle("Alerta")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -683,7 +617,128 @@ public class Datos extends AppCompatActivity {
                         }
                     });
             alertDialog.show();
+            return false;
+        } else if (conjuntoSelected.trim().equalsIgnoreCase("") || conjuntoSelected.trim().equalsIgnoreCase("Usuario sin conjuntos") || conjuntoSelected.trim().equalsIgnoreCase("No hay direcciones para este conjunto") || conjuntoSelected.trim().equalsIgnoreCase("Seleccione...")) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
+            alertDialog.setMessage("Debe seleccionar un conjunto.")
+                    .setTitle("Alerta")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+            alertDialog.show();
+            return false;
+        } else if (direccionSelected.trim().equalsIgnoreCase("") || direccionSelected.trim().equalsIgnoreCase("No se han cargado los datos") || direccionSelected.trim().equalsIgnoreCase("No hay direcciones para este conjunto") || direccionSelected.trim().equalsIgnoreCase("Seleccione...")) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
+            alertDialog.setMessage("Debe seleccionar una dirección.")
+                    .setTitle("Alerta")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+            alertDialog.show();
+            return false;
+        } else if (medidor.getText().toString().trim().equalsIgnoreCase("")) {
+            medidor.setError("No se ha cargado información");
+            return false;
+        } else if (consumoAnterior.getText().toString().trim().equalsIgnoreCase("")) {
+            consumoAnterior.setError("No se ha cargado información");
+            return false;
+        } else if (consumoActual.getText().toString().trim().equalsIgnoreCase("") && consumoActual.getVisibility() == View.VISIBLE) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
+            alertDialog.setMessage("Debe ingresar el consumo actual.")
+                    .setTitle("Alerta")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+            alertDialog.show();
+            return false;
+        } else if (bitmapImage == null) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
+            alertDialog.setMessage("Debe tomar una foto.")
+                    .setTitle("Alerta")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.cancel();
+                        }
+                    });
+            alertDialog.show();
+            return false;
+        } else if (latitud.trim().equalsIgnoreCase("")) {
+            Toast.makeText(this, "Espere un momento a que se cargue la geoposición", Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (longitud.trim().equalsIgnoreCase("")) {
+            Toast.makeText(this, "Espere un momento a que se cargue la geoposición", Toast.LENGTH_SHORT).show();
+            return false;
         }
+
+        if(consumoActual.getVisibility() == View.GONE){
+            consumoActual.setText("");
+        }
+
+        if(checkBox.isChecked()){
+            CheckMedidor = true;
+        }
+
+        return true;
+    }
+
+    @SuppressLint("WrongConstant")
+    private void vaciarConMensaje () {
+        progressBar.setVisibility(0);
+
+        eliminarDireccion(idTablaCarga);
+
+        idTablaCarga = 0;
+
+        direccionSelected = "";
+
+        claveSelected = "";
+        clave = "";
+
+        if(claves != null){
+            customSearchableSpinnerClaves.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, claves));
+        }
+
+        medidor.setText("");
+        consumoAnterior.setText("");
+        consumoActual.setText("");
+        currentPhotoPath = "";
+        imageFileName = "";
+        latitud = "";
+        longitud = "";
+        CheckMedidor = false;
+        if(checkBox.isChecked()){
+            checkBox.toggle();
+        }
+        if(consumoActual.getVisibility() == View.GONE){
+            consumoActual.setVisibility(View.VISIBLE);
+            consumoActualText.setVisibility(View.VISIBLE);
+        }
+        bitmapImage = null;
+        imageView.setImageBitmap(null);
+
+        new getConjuntos().execute(urlConjuntos + usuario);
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
+        alertDialog.setMessage("Los datos se han guardado correctamente.")
+                .setTitle("Datos ingresados")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+        alertDialog.show();
+    }
 
     private void eliminarDireccion(int idTablaCarga) {
 
@@ -708,7 +763,7 @@ public class Datos extends AppCompatActivity {
             consumoAnteriorList = auxConsumoAnteriorList;
             medidorList = auxMedidorList;
             idTablaCargaList = auxIdTablaCargaList;
-            customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
+            customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
 
         }else{
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
@@ -724,7 +779,7 @@ public class Datos extends AppCompatActivity {
 
             String[] nulo = new String[1];
             nulo[0] = "No hay direcciones para este conjunto";
-            customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+            customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
 
         }
 
@@ -732,64 +787,112 @@ public class Datos extends AppCompatActivity {
 
     private void vaciar() {
 
-            idTablaCarga = 0;
+        direccionSelected = "";
+        idTablaCarga = 0;
 
-            dropDown1Selected = "";
-
-            if(direcciones != null){
-                if(direcciones.length > 2){
-                    customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
-                }else{
-                    String[] nulo = new String[1];
-                    nulo[0] = "No hay direcciones para este conjunto";
-                    customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
-                }
-            }
-
-            dropDown2Selected = "";
-            clave = "";
-            dropDownClaves.setText("Seleccione...");
-
-            medidor.setText("");
-            consumoAnterior.setText("");
-            consumoActual.setText("");
-            currentPhotoPath = "";
-            imageFileName = "";
-            latitud = "";
-            longitud = "";
-            CheckMedidor = false;
-            if(checkBox.isChecked()){
-                checkBox.toggle();
-            }
-            bitmapImage = null;
-            imageView.setImageBitmap(null);
-
-            if(checkBox.isChecked()){
-                checkBox.toggle();
-            }
-            if(consumoActual.getVisibility() == View.GONE){
-                consumoActual.setVisibility(View.VISIBLE);
-                consumoActualText.setVisibility(View.VISIBLE);
+        if(direcciones != null){
+            if(direcciones.length > 2){
+                customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
+            }else{
+                String[] nulo = new String[1];
+                nulo[0] = "No hay direcciones para este conjunto";
+                customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
             }
         }
 
-        private class getConjuntos extends AsyncTask<String, String, String> {
+        claveSelected = "";
+        clave = "";
 
-            @Override
-            protected String doInBackground(String... strings) {
-                Connection connection = new Connection();
-                String jsonString = connection.getConnection(strings[0]);
+        if(claves != null){
+            customSearchableSpinnerClaves.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, claves));
+        }
 
-                return jsonString;
+        medidor.setText("");
+        consumoAnterior.setText("");
+        consumoActual.setText("");
+        currentPhotoPath = "";
+        imageFileName = "";
+        latitud = "";
+        longitud = "";
+        CheckMedidor = false;
+        if(checkBox.isChecked()){
+            checkBox.toggle();
+        }
+        bitmapImage = null;
+        imageView.setImageBitmap(null);
+
+        if(checkBox.isChecked()){
+            checkBox.toggle();
+        }
+        if(consumoActual.getVisibility() == View.GONE){
+            consumoActual.setVisibility(View.VISIBLE);
+            consumoActualText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private class getComunas extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Connection connection = new Connection();
+            String jsonString = connection.getConnection(strings[0]);
+            return jsonString;
+        }
+
+        @SuppressLint("WrongConstant")
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
+
+            if (response != null) {
+
+                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
+                response = "[{'IDUsuarioPerfil':'0', 'Com_Reg':'Seleccione...'},"+response+"]";
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+
+                    if (jsonArray.length() > 1) {
+                        comunas = new String[jsonArray.length()];
+                        idsComunas = new String[jsonArray.length()];
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            comunas[i] = jsonObject.getString("Com_Reg").replaceAll("'", "\"");
+                            idsComunas[i] = jsonObject.getString("IDUsuarioPerfil").replaceAll("'", "\"");
+                        }
+                        customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, comunas));
+                    } else {
+                        String[] nulo = new String[1];
+                        nulo[0] = "No hay comunas";
+                        customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }
+            progressBar.setVisibility(8);
+        }
+    }
 
-            @SuppressLint("WrongConstant")
-            protected void onPostExecute(String response) {
-                super.onPostExecute(response);
+    private class getConjuntos extends AsyncTask<String, String, String> {
 
-                if (response != null) {
-                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "");
+        @Override
+        protected String doInBackground(String... strings) {
+            Connection connection = new Connection();
+            String jsonString = connection.getConnection(strings[0]);
+            return jsonString;
+        }
 
+        @SuppressLint("WrongConstant")
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
+
+            if (response != null) {
+                if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
+                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
+                    response = "[{'Conjunto':'Seleccione...'},"+response+"]";
                     try {
 
                         JSONArray jsonArray = new JSONArray(response);
@@ -801,45 +904,47 @@ public class Datos extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
 
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                conjuntos[i] = jsonObject.getString("Nombre").replaceAll("'", "\"");
-
+                                conjuntos[i] = jsonObject.getString("Conjunto").replaceAll("'", "\"");
                             }
-                            dropDownConjuntos.setDropdownData(conjuntos);
+                            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, conjuntos));
                         } else {
 
                             String[] nulo = new String[1];
                             nulo[0] = "Usuario sin conjuntos";
-                            dropDownConjuntos.setDropdownData(nulo);
-
+                            customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
                         }
 
                     } catch (JSONException e) {
-                        Log.e("Error json", e.getMessage());
                         e.printStackTrace();
                     }
-
                 } else {
-                    Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
+                    String[] nulo = new String[1];
+                    nulo[0] = "Seleccione...";
+                    customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                    conjuntoSelected = "";
                 }
-                progressBar.setVisibility(8);
+            } else {
+                Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }
+            progressBar.setVisibility(8);
+        }
+    }
+
+    private class getDirecciones extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Connection connection = new Connection();
+            String jsonString = connection.getConnection(strings[0]);
+            return jsonString;
         }
 
-        private class getDirecciones extends AsyncTask<String, String, String> {
+        @SuppressLint("WrongConstant")
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
 
-            @Override
-            protected String doInBackground(String... strings) {
-                Connection connection = new Connection();
-                String jsonString = connection.getConnection(strings[0]);
-                return jsonString;
-            }
-
-            @SuppressLint("WrongConstant")
-            protected void onPostExecute(String response) {
-                super.onPostExecute(response);
-
-                if (response != null) {
-
+            if (response != null) {
+                if(!conjuntoSelected.trim().equalsIgnoreCase("") && !conjuntoSelected.trim().equalsIgnoreCase("Seleccione...")){
                     response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
                     response = "[{'Calle':'Seleccione...'},"+response+"]";
 
@@ -862,66 +967,75 @@ public class Datos extends AppCompatActivity {
                                     idTablaCargaList[i] = Integer.valueOf(jsonObject.getString("IDTablaCarga"));
                                 }
                             }
-                            customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
+                            customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
                         } else {
 
                             String[] nulo = new String[1];
                             nulo[0] = "No hay direcciones para este conjunto";
-                            customSearchableSpinner.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                            customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
 
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
+                    String[] nulo = new String[1];
+                    nulo[0] = "Seleccione...";
+                    customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                    direccionSelected = "";
                 }
-                progressBar.setVisibility(8);
+            } else {
+                Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }
+            progressBar.setVisibility(8);
+        }
+    }
+
+    private class getClaves extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Connection connection = new Connection();
+            String jsonString = connection.getConnection(strings[0]);
+            return jsonString;
         }
 
-        private class getClaves extends AsyncTask<String, String, String> {
+        protected void onPostExecute(String response) {
+            super.onPostExecute(response);
 
-            @Override
-            protected String doInBackground(String... strings) {
-                Connection connection = new Connection();
-                String jsonString = connection.getConnection(strings[0]);
-                return jsonString;
-            }
+            if (response != null) {
 
-            protected void onPostExecute(String response) {
-                super.onPostExecute(response);
+                response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("\\[", "").replaceAll("\\]", "").replaceFirst("\"", "").replaceAll("\\\\", "");
+                response = "[{'IDClave':'0', 'Descripcion':'Seleccione...'},"+response+"]";
 
-                if (response != null) {
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
 
-                    response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("\\[", "").replaceAll("\\]", "").replaceFirst("\"", "").replaceAll("\\\\", "");
-                    response = "[{'IDClave':'0', 'Descripcion':'Seleccione...'},"+response+"]";
+                    if (jsonArray.length() != 1) {
+                        claves = new String[jsonArray.length()];
+                        idClaves = new String[jsonArray.length()];
+                        for (int i = 0; i < jsonArray.length(); i++) {
 
-                    try {
-                        JSONArray jsonArray = new JSONArray(response);
-
-                        if (jsonArray.length() != 1) {
-                            claves = new String[jsonArray.length()];
-                            idClaves = new String[jsonArray.length()];
-                            for (int i = 0; i < jsonArray.length(); i++) {
-
-                                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                claves[i] = jsonObject.getString("Descripcion").replaceAll("\\,", "");
-                                idClaves[i] = jsonObject.getString("IDClave").replaceAll("\\,", "");
-                            }
-                            dropDownClaves.setDropdownData(claves);
-                        } else {
-                            String[] nulo = new String[1];
-                            nulo[0] = "No hay direcciones para este conjunto";
-                            dropDownClaves.setDropdownData(nulo);
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            claves[i] = jsonObject.getString("Descripcion").replaceAll("\\,", "");
+                            idClaves[i] = jsonObject.getString("IDClave").replaceAll("\\,", "");
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+
+                        customSearchableSpinnerClaves.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, claves));
+                    } else {
+                        String[] nulo = new String[1];
+                        nulo[0] = "Seleccione...";
+                        if(claves != null){
+                            customSearchableSpinnerClaves.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                        }
                     }
-                } else {
-                    Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+            } else {
+                Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }
         }
     }
+}
 

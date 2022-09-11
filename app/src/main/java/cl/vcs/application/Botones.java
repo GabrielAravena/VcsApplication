@@ -16,14 +16,14 @@ import com.beardedhen.androidbootstrap.BootstrapButton;
 public class Botones extends AppCompatActivity {
 
     BootstrapButton botonTomaEstado, botonEntregaBoleta, botonCerrarSesion, botonEnviarDocumentos;
-    String comuna = "";
+    String usuario = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_botones);
 
-        comuna = getIntent().getStringExtra("comuna");
+        usuario = getIntent().getStringExtra("usuario");
 
         botonTomaEstado = (BootstrapButton) findViewById(R.id.buttonTomaEstado);
         botonEntregaBoleta = (BootstrapButton) findViewById(R.id.buttonEntregaBoleta);
@@ -34,7 +34,7 @@ public class Botones extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Botones.this, Datos.class);
-                intent.putExtra("comuna", comuna);
+                intent.putExtra("usuario", usuario);
                 startActivity(intent);
             }
         });
@@ -43,7 +43,7 @@ public class Botones extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Botones.this, Boletas.class);
-                intent.putExtra("comuna", comuna);
+                intent.putExtra("usuario", usuario);
                 startActivity(intent);
             }
         });
@@ -103,7 +103,7 @@ public class Botones extends AppCompatActivity {
         });
 
         if(savedInstanceState != null){
-            comuna = savedInstanceState.getString("comuna");
+            usuario = savedInstanceState.getString("comuna");
         }
     }
 
@@ -132,6 +132,6 @@ public class Botones extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString("comuna", comuna);
+        outState.putString("usuario", usuario);
     }
 }

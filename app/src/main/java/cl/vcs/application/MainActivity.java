@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
 
-        Log.e("ALARMA", "Alarma creada!!!");
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BootReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -118,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         usuario.setText("");
         password.setText("");
         Intent intent = new Intent(this, Botones.class);
-        intent.putExtra("comuna", response);
+        intent.putExtra("usuario", response);
         startActivity(intent);
     }
 

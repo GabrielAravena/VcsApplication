@@ -90,6 +90,42 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/textViewComunas"
+                android:layout_width="151dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="Comuna"
+                android:textColor="#000000"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.032"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/consumoActualLinear2" />
+
+            <cl.vcs.application.CustomSearchableSpinner
+                android:id="@+id/customSearchableSpinnerComunas"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:dropDownWidth="match_parent"
+                android:paddingLeft="30dip"
+                android:spinnerMode="dropdown"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="#CD000000"
+                android:textSize="14dp"
+                app:bootstrapExpandDirection="down"
+                app:bootstrapSize="md"
+                app:hintText="Seleccione..."
+                app:layout_constraintTop_toBottomOf="@+id/textViewComunas" />
+
+            <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,29 +141,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageButton" />
 
-
-            <com.beardedhen.androidbootstrap.BootstrapDropDown
-                android:id="@+id/bootstrapDropDown"
+            <cl.vcs.application.CustomSearchableSpinner
+                android:id="@+id/customSearchableSpinnerConjuntos"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@color/bootstrap_brand_primary"
-                android:foregroundGravity="bottom"
+                android:dropDownWidth="match_parent"
+                android:paddingLeft="30dip"
+                android:spinnerMode="dropdown"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                app:bootstrapBrand="secondary"
+                android:textColor="#CD000000"
+                android:textSize="14dp"
                 app:bootstrapExpandDirection="down"
                 app:bootstrapSize="md"
-                app:bootstrapText="Seleccione..."
-                app:dropdownResource="@array/conjuntos"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView2"
-                app:roundedCorners="false" />
+                app:hintText="Seleccione..."
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
             <TextView
                 android:id="@+id/quienRecibeText"
