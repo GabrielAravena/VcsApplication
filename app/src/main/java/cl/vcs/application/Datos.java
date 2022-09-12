@@ -202,7 +202,10 @@ public class Datos extends AppCompatActivity {
                 if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
                     progressBar.setVisibility(0);
                     conjuntoSelected = conjuntos[i];
-                    new getDirecciones().execute(urlDirecciones + conjuntoSelected + "&Usuario=" + usuario);
+                    if(!conjuntoSelected.trim().equalsIgnoreCase("") && !conjuntoSelected.trim().equalsIgnoreCase("Seleccione..."))
+                        new getDirecciones().execute(urlDirecciones + conjuntoSelected + "&Usuario=" + usuario);
+                    else
+                        progressBar.setVisibility(8);
                 }
             }
 
@@ -313,7 +316,7 @@ public class Datos extends AppCompatActivity {
             public void onClick(View view) {
                 progressBar.setVisibility(0);
                 vaciar();
-                new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
+                new getComunas().execute(urlComunas + usuario);
                 setDatosSincronizacion();
             }
         });
@@ -790,7 +793,8 @@ public class Datos extends AppCompatActivity {
         direccionSelected = "";
         idTablaCarga = 0;
 
-        if(direcciones != null){
+        /*if(direcciones != null){
+            Log.e("vaciar", "vaciar");
             if(direcciones.length > 2){
                 customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, direcciones));
             }else{
@@ -798,7 +802,7 @@ public class Datos extends AppCompatActivity {
                 nulo[0] = "No hay direcciones para este conjunto";
                 customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
             }
-        }
+        }*/
 
         claveSelected = "";
         clave = "";
@@ -866,6 +870,17 @@ public class Datos extends AppCompatActivity {
                         nulo[0] = "No hay comunas";
                         customSearchableSpinnerComunas.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
                     }
+
+                    Log.e("getcomunas", "getcomunas");
+
+                    conjuntoSelected = "";
+                    direccionSelected = "";
+
+                    String[] nulo = new String[1];
+                    nulo[0] = "Seleccione...";
+                    customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+                    customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -893,6 +908,7 @@ public class Datos extends AppCompatActivity {
                 if(!comunaSelected.trim().equalsIgnoreCase("") && !comunaSelected.trim().equalsIgnoreCase("Seleccione...")){
                     response = response.replaceFirst("[\\s\\S]{0,1}$", "").replaceAll("[\\\\][\\\\][\"]", "'").replaceFirst("\"", "").replaceAll("\\\\", "").replaceAll("\\[", "").replaceAll("\\]", "");
                     response = "[{'Conjunto':'Seleccione...'},"+response+"]";
+                    Log.e("respuesta getConjuntos", response);
                     try {
 
                         JSONArray jsonArray = new JSONArray(response);
@@ -914,6 +930,12 @@ public class Datos extends AppCompatActivity {
                             customSearchableSpinnerConjuntos.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
                         }
 
+                        Log.e("getconjuntos", "getconjuntos");
+                        direccionSelected = "";
+                        String[] nulo = new String[1];
+                        nulo[0] = "Seleccione...";
+                        customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -926,6 +948,7 @@ public class Datos extends AppCompatActivity {
             } else {
                 Toast.makeText(Datos.this, "Es posible que no tenga conexión a internet", Toast.LENGTH_SHORT).show();
             }
+            Log.e("getconjuntosFinal", "getconjuntosFinal");
             progressBar.setVisibility(8);
         }
     }
@@ -973,8 +996,9 @@ public class Datos extends AppCompatActivity {
                             String[] nulo = new String[1];
                             nulo[0] = "No hay direcciones para este conjunto";
                             customSearchableSpinnerDirecciones.setAdapter(new ArrayAdapter<>(Datos.this, R.layout.spinner_item, nulo));
-
                         }
+
+                        Log.e("getDirecciones", "getDirecciones");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
