@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             Connection connection = new Connection();
-            String response = connection.getConnection("https://test.vrrd.cl/api/Usuario?Usuario="+stringUsuario+"&Contrasena="+stringPassword);
+            String response = connection.getConnection("https://apimovil.vrrd.cl/api/Usuario?Usuario="+stringUsuario+"&Contrasena="+stringPassword);
             return response;
         }
         @SuppressLint("WrongConstant")

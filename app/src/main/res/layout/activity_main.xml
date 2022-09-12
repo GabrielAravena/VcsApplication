@@ -100,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="230dp"
                 android:gravity="center"
-                android:text="V4.0"
+                android:text="V4.0 RM - Quinta Región"
                 app:layout_constraintTop_toBottomOf="@+id/button" />
 
         </LinearLayout>
