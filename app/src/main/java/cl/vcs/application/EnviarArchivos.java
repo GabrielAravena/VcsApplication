@@ -60,15 +60,17 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
                     StringBuilder stringBuilder = ArchivoTexto.leerArchivo(context, "Toma_de_estado.txt");
 
                     try {
-                        JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-                        JSONObject jsonObject = jsonArray.getJSONObject(0);
-                        String usuario = jsonObject.getString("Usuario");
-                        if (enviar(fileToBase64(file), "Toma_de_estado.txt", usuario)) {
-                            file.delete();
-                            Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
-                        }else{
-                            charSet(context, "Toma_de_estado.txt");
-                            intentosToma++;
+                        if(stringBuilder != null){
+                            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                            JSONObject jsonObject = jsonArray.getJSONObject(0);
+                            String usuario = jsonObject.getString("Usuario");
+                            if (enviar(fileToBase64(file), "Toma_de_estado.txt", usuario)) {
+                                file.delete();
+                                Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
+                            }else{
+                                charSet(context, "Toma_de_estado.txt");
+                                intentosToma++;
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -83,15 +85,17 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
                     StringBuilder stringBuilder = ArchivoTexto.leerArchivo(context, "Boletas.txt");
 
                     try {
-                        JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-                        JSONObject jsonObject = jsonArray.getJSONObject(0);
-                        String usuario = jsonObject.getString("Usuario");
-                        if(enviar(fileToBase64(file), "Boletas.txt", usuario)){
-                            file.delete();
-                            Log.e("ELIMINAR_TXT", "Archivo Boletas.txt eliminado");
-                        }else{
-                            charSet(context, "Boletas.txt");
-                            intentosBoletas++;
+                        if(stringBuilder != null){
+                            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                            JSONObject jsonObject = jsonArray.getJSONObject(0);
+                            String usuario = jsonObject.getString("Usuario");
+                            if(enviar(fileToBase64(file), "Boletas.txt", usuario)){
+                                file.delete();
+                                Log.e("ELIMINAR_TXT", "Archivo Boletas.txt eliminado");
+                            }else{
+                                charSet(context, "Boletas.txt");
+                                intentosBoletas++;
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -103,7 +107,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
     private boolean enviar(String archivoString, String nombreArchivo, String usuario){
 
-        String url = "https://test.vrrd.cl/api/Archivo";
+        String url = "https://apimovil.vrrd.cl/api/Archivo";
 
         try {
 
