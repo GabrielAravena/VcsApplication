@@ -729,7 +729,7 @@ public class Datos extends AppCompatActivity {
         bitmapImage = null;
         imageView.setImageBitmap(null);
 
-        new getConjuntos().execute(urlConjuntos + usuario);
+        new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
         alertDialog.setMessage("Los datos se han guardado correctamente.")
