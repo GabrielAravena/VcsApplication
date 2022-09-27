@@ -1,5 +1,6 @@
 package cl.vcs.application;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
@@ -18,8 +19,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 
@@ -33,14 +36,24 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
     protected Void doInBackground(String... strings) {
 
         Context context = MyApplication.getAppContext();
-
         String[] archivos = context.fileList();
 
         if(archivos.length == 0){
             Log.e("ELIMINAR_TXT", "No hay archivos");
         }else{
-            for(String archivo : archivos){
-                if(archivo.equalsIgnoreCase("Toma_de_estado.txt")) {
+            getArchivos(context, archivos);
+        }
+        return null;
+    }
+
+    private void getArchivos(Context context, String[] archivos){
+
+        int intentosToma = 0;
+        int intentosBoletas = 0;
+
+        for(String archivo : archivos){
+            if(archivo.equalsIgnoreCase("Toma_de_estado.txt")) {
+                while(intentosToma < 2){
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Toma_de_estado.txt");
 
@@ -53,11 +66,17 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
                         if (enviar(fileToBase64(file), "Toma_de_estado.txt", usuario)) {
                             file.delete();
                             Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
+                        }else{
+                            charSet(context, "Toma_de_estado.txt");
+                            intentosToma++;
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }else if(archivo.equalsIgnoreCase("Boletas.txt")){
+                }
+
+            }else if(archivo.equalsIgnoreCase("Boletas.txt")){
+                while(intentosBoletas < 2){
                     File dir = context.getFilesDir();
                     File file = new File(dir, "Boletas.txt");
 
@@ -70,6 +89,9 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
                         if(enviar(fileToBase64(file), "Boletas.txt", usuario)){
                             file.delete();
                             Log.e("ELIMINAR_TXT", "Archivo Boletas.txt eliminado");
+                        }else{
+                            charSet(context, "Boletas.txt");
+                            intentosBoletas++;
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -77,7 +99,6 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
                 }
             }
         }
-        return null;
     }
 
     private boolean enviar(String archivoString, String nombreArchivo, String usuario){
@@ -114,7 +135,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
             httpsURLConnection.setRequestMethod("POST");
 
             DataOutputStream localDataOutputStream = new DataOutputStream(httpsURLConnection.getOutputStream());
-            localDataOutputStream.writeBytes(jsonBody.toString());
+            localDataOutputStream.write(jsonBody.toString().getBytes("UTF-8"));
             localDataOutputStream.flush();
             localDataOutputStream.close();
 
@@ -142,6 +163,27 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void charSet(Context context, String nombreArchivo){
+
+        StringBuilder stringBuilder = ArchivoTexto.leerArchivo(context, nombreArchivo);
+
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(nombreArchivo, Activity.MODE_PRIVATE));
+
+            if(stringBuilder != null){
+                outputStreamWriter.write(new String(stringBuilder.toString().getBytes("UTF-8")));
+            }
+
+            outputStreamWriter.flush();
+            outputStreamWriter.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private String fileToBase64(File file) {

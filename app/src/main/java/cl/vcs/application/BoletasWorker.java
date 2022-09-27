@@ -146,7 +146,7 @@ public class BoletasWorker extends Worker {
             httpsURLConnection.setRequestMethod("POST");
 
             DataOutputStream localDataOutputStream = new DataOutputStream(httpsURLConnection.getOutputStream());
-            localDataOutputStream.writeBytes(jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N"));
+            localDataOutputStream.write(jsonBody.toString().replaceAll("ñ", "n").replaceAll("Ñ", "N").getBytes("UTF-8"));
             localDataOutputStream.flush();
             localDataOutputStream.close();
 
