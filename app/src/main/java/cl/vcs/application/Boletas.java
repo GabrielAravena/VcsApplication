@@ -82,8 +82,8 @@ public class Boletas extends AppCompatActivity {
     String latitud = "";
     String longitud = "";
 
-    private static String urlComunas = "https://apimovil.vrrd.cl/api/Comuna?Usuario=";
-    private static String urlConjuntos = "https://apimovil.vrrd.cl/api/ConjuntoBoletaV2?Usuario=";
+    private static String urlComunas = "https://restapi.vrrd.cl/api/Comuna?Usuario=";
+    private static String urlConjuntos = "https://restapi.vrrd.cl/api/ConjuntoBoletaV2?Usuario=";
 
     static final int REQUEST_LOCATION_CODE = 2;
 

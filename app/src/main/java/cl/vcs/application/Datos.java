@@ -106,10 +106,10 @@ public class Datos extends AppCompatActivity {
     int idTablaCarga = 0;
     boolean CheckMedidor = false;
 
-    private static String urlComunas = "https://apimovil.vrrd.cl/api/Comuna?Usuario=";
-    private static String urlConjuntos = "https://apimovil.vrrd.cl/api/ConjuntoComuna?Usuario=";
-    private static String urlDirecciones = "https://apimovil.vrrd.cl/api/DireccionV2?Conjunto=";
-    private static String urlClaves = "https://apimovil.vrrd.cl/api/Clave";
+    private static String urlComunas = "https://restapi.vrrd.cl/api/Comuna?Usuario=";
+    private static String urlConjuntos = "https://restapi.vrrd.cl/api/ConjuntoComuna?Usuario=";
+    private static String urlDirecciones = "https://restapi.vrrd.cl/api/DireccionV2?Conjunto=";
+    private static String urlClaves = "https://restapi.vrrd.cl/api/Clave";
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;

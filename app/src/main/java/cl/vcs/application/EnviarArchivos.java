@@ -61,13 +61,15 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
                     try {
                         if(stringBuilder != null){
-                            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+                            Log.e("StringBuilder", stringBuilder.toString());
+                            JSONArray jsonArray = new JSONArray(stringBuilder.toString().replace("[,", "["));
                             JSONObject jsonObject = jsonArray.getJSONObject(0);
                             String usuario = jsonObject.getString("Usuario");
                             if (enviar(fileToBase64(file), "Toma_de_estado.txt", usuario)) {
                                 file.delete();
                                 Log.e("ELIMINAR_TXT", "Archivo Toma de estado.txt eliminado");
                             }else{
+                                Log.e("StringBuilder", "Sin datos");
                                 charSet(context, "Toma_de_estado.txt");
                                 intentosToma++;
                             }
@@ -107,7 +109,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
     private boolean enviar(String archivoString, String nombreArchivo, String usuario){
 
-        String url = "https://apimovil.vrrd.cl/api/Archivo";
+        String url = "https://restapi.vrrd.cl/api/Archivo";
 
         try {
 

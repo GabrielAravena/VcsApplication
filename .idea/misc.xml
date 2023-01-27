@@ -6,7 +6,7 @@
         <entry key="..\:/Users/gabob/Personales/VcsApplication/app/src/main/res/layout/activity_boletas.xml" value="0.31614583333333335" />
         <entry key="..\:/Users/gabob/Personales/VcsApplication/app/src/main/res/layout/activity_botones.xml" value="0.31614583333333335" />
         <entry key="..\:/Users/gabob/Personales/VcsApplication/app/src/main/res/layout/activity_datos.xml" value="0.36666666666666664" />
-        <entry key="..\:/Users/gabob/Personales/VcsApplication/app/src/main/res/layout/activity_main.xml" value="0.22760416666666666" />
+        <entry key="..\:/Users/gabob/Personales/VcsApplication/app/src/main/res/layout/activity_main.xml" value="0.5" />
       </map>
     </option>
   </component>
@@ -15,5 +15,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.5" />
+      </ProjectState>
+    </option>
   </component>
 </project>
