@@ -729,8 +729,8 @@ public class Datos extends AppCompatActivity {
         bitmapImage = null;
         imageView.setImageBitmap(null);
 
-        new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
-
+        //new getConjuntos().execute(urlConjuntos + usuario + "&IDUsuarioPerfil=" + idComunaSelected);
+        progressBar.setVisibility(8);
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
         alertDialog.setMessage("Los datos se han guardado correctamente.")
                 .setTitle("Datos ingresados")
