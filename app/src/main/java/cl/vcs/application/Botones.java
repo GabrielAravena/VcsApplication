@@ -15,7 +15,7 @@ import com.beardedhen.androidbootstrap.BootstrapButton;
 
 public class Botones extends AppCompatActivity {
 
-    BootstrapButton botonTomaEstado, botonEntregaBoleta, botonCerrarSesion, botonEnviarDocumentos;
+    BootstrapButton botonTomaEstado, botonEntregaBoleta, botonEntregaBoletaCodigo, botonCerrarSesion, botonEnviarDocumentos;
     String usuario = "";
 
     @Override
@@ -27,6 +27,7 @@ public class Botones extends AppCompatActivity {
 
         botonTomaEstado = (BootstrapButton) findViewById(R.id.buttonTomaEstado);
         botonEntregaBoleta = (BootstrapButton) findViewById(R.id.buttonEntregaBoleta);
+        botonEntregaBoletaCodigo = (BootstrapButton) findViewById(R.id.buttonEntregaBoletaCodigo);
         botonEnviarDocumentos = (BootstrapButton) findViewById(R.id.buttonEnviarDocumentos);
         botonCerrarSesion = (BootstrapButton) findViewById(R.id.buttonCerrarSesion);
 
@@ -43,6 +44,15 @@ public class Botones extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Botones.this, Boletas.class);
+                intent.putExtra("usuario", usuario);
+                startActivity(intent);
+            }
+        });
+
+        botonEntregaBoletaCodigo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Botones.this, BoletasCodigo.class);
                 intent.putExtra("usuario", usuario);
                 startActivity(intent);
             }

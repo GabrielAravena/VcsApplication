@@ -19,6 +19,12 @@
             android:name=".Boletas"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".BoletasCodigo"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ActivityEscanear"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".Datos"
             android:screenOrientation="portrait" />
         <activity
