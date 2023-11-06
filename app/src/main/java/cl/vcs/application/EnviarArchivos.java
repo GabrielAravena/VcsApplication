@@ -109,7 +109,7 @@ public class EnviarArchivos extends AsyncTask<String, String, Void> {
 
     private boolean enviar(String archivoString, String nombreArchivo, String usuario){
 
-        String url = "https://restapi.vrrd.cl/api/Archivo";
+        String url = "https://movilrapp.amcospa.cl/api/Archivo";
 
         try {
 

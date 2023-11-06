@@ -7,8 +7,8 @@ android {
         applicationId "cl.vcs.application"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 15
-        versionName "5.2"
+        versionCode 16
+        versionName "5.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
