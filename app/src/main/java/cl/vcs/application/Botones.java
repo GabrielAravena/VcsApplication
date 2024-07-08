@@ -27,7 +27,7 @@ public class Botones extends AppCompatActivity {
 
         botonTomaEstado = (BootstrapButton) findViewById(R.id.buttonTomaEstado);
         botonEntregaBoleta = (BootstrapButton) findViewById(R.id.buttonEntregaBoleta);
-        botonEnviarDocumentos = (BootstrapButton) findViewById(R.id.buttonEnviarDocumentos);
+        //botonEnviarDocumentos = (BootstrapButton) findViewById(R.id.buttonEnviarDocumentos);
         botonCerrarSesion = (BootstrapButton) findViewById(R.id.buttonCerrarSesion);
 
         botonTomaEstado.setOnClickListener(new View.OnClickListener() {
@@ -48,7 +48,7 @@ public class Botones extends AppCompatActivity {
             }
         });
 
-        botonEnviarDocumentos.setOnClickListener(new View.OnClickListener() {
+        /* botonEnviarDocumentos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Context context = MyApplication.getAppContext();
@@ -66,7 +66,7 @@ public class Botones extends AppCompatActivity {
                             });
                     alertDialog.show();
                 }else{
-                    new EnviarArchivos().execute();
+                    //new EnviarArchivos().execute();
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(Botones.this);
                     alertDialog.setMessage("El documento se ha enviado correctamente.")
                             .setTitle("Envío de documento")
@@ -78,7 +78,7 @@ public class Botones extends AppCompatActivity {
                     alertDialog.show();
                 }
             }
-        });
+        }); */
 
         botonCerrarSesion.setOnClickListener(new View.OnClickListener() {
             @Override

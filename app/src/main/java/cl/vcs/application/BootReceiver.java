@@ -56,11 +56,11 @@ public class BootReceiver extends BroadcastReceiver {
                 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }else{
                 Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
-                new EnviarArchivos().execute();
+                //new EnviarArchivos().execute();
             }
         }else{
             Log.e("ALARMA", "Alarma de eliminar archivos activada!!!");
-            new EnviarArchivos().execute();
+            //new EnviarArchivos().execute();
         }
     }
 }

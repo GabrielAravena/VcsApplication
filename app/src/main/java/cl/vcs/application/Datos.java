@@ -476,7 +476,7 @@ public class Datos extends AppCompatActivity {
                                         longitud = (""+location.getLongitude());
                                         if(camposLlenos()){
                                             UploadWorker.enviarDatos(datos(), Datos.this);
-                                            ArchivoTexto.guardar(Datos.this, datosText(), "Toma_de_estado.txt");
+                                            //ArchivoTexto.guardar(Datos.this, datosText(), "Toma_de_estado.txt");
                                             setDatosSincronizacion();
                                             vaciarConMensaje();
                                         }
