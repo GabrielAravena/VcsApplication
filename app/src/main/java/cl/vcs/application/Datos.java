@@ -311,7 +311,7 @@ public class Datos extends AppCompatActivity {
             }
         });
 
-        bootstrapButton5.setOnClickListener(new View.OnClickListener() {
+        /*bootstrapButton5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(0);
@@ -319,7 +319,7 @@ public class Datos extends AppCompatActivity {
                 new getComunas().execute(urlComunas + usuario);
                 setDatosSincronizacion();
             }
-        });
+        });*/
 
         if(savedInstanceState != null){
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
