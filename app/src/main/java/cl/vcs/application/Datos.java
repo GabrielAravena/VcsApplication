@@ -106,10 +106,10 @@ public class Datos extends AppCompatActivity {
     int idTablaCarga = 0;
     boolean CheckMedidor = false;
 
-    private static String urlComunas = "https://movilappv2.amcospa.cl/api/Comuna?Usuario=";
-    private static String urlConjuntos = "https://movilappv2.amcospa.cl/api/ConjuntoComuna?Usuario=";
-    private static String urlDirecciones = "https://movilappv2.amcospa.cl/api/DireccionV2?Conjunto=";
-    private static String urlClaves = "https://movilappv2.amcospa.cl/api/Clave";
+    private static String urlComunas = "https://movilrapp.amcospa.cl/api/Comuna?Usuario=";
+    private static String urlConjuntos = "https://movilrapp.amcospa.cl/api/ConjuntoComuna?Usuario=";
+    private static String urlDirecciones = "https://movilrapp.amcospa.cl/api/DireccionV2?Conjunto=";
+    private static String urlClaves = "https://movilrapp.amcospa.cl/api/Clave";
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
@@ -132,7 +132,7 @@ public class Datos extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageView);
         botonFoto = (BootstrapButton) findViewById(R.id.botonFoto);
         bootstrapButton4 = (BootstrapButton) findViewById(R.id.bootstrapButton4);
-        bootstrapButton5 = (BootstrapButton) findViewById(R.id.bootstrapButton5);
+        //bootstrapButton5 = (BootstrapButton) findViewById(R.id.bootstrapButton5);
         medidor =  (TextView) findViewById(R.id.medidor);
         consumoAnterior = (TextView) findViewById(R.id.consumoAnterior);
         consumoActual = (BootstrapEditText) findViewById(R.id.consumoActual);

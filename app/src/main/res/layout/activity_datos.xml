@@ -51,20 +51,6 @@
                     android:tint="#FFFFFF"
                     app:srcCompat="@drawable/abc_vector_test" />
 
-                <com.beardedhen.androidbootstrap.BootstrapButton
-                    android:id="@+id/bootstrapButton5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginLeft="32dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
-                    android:text="Refrescar"
-                    app:bootstrapBrand="success"
-                    app:bootstrapSize="md"
-                    app:buttonMode="regular" />
-
             </LinearLayout>
 
             <LinearLayout
