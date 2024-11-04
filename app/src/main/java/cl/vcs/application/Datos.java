@@ -132,7 +132,7 @@ public class Datos extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageView);
         botonFoto = (BootstrapButton) findViewById(R.id.botonFoto);
         bootstrapButton4 = (BootstrapButton) findViewById(R.id.bootstrapButton4);
-        //bootstrapButton5 = (BootstrapButton) findViewById(R.id.bootstrapButton5);
+        bootstrapButton5 = (BootstrapButton) findViewById(R.id.bootstrapButton5);
         medidor =  (TextView) findViewById(R.id.medidor);
         consumoAnterior = (TextView) findViewById(R.id.consumoAnterior);
         consumoActual = (BootstrapEditText) findViewById(R.id.consumoActual);
@@ -311,7 +311,7 @@ public class Datos extends AppCompatActivity {
             }
         });
 
-        /*bootstrapButton5.setOnClickListener(new View.OnClickListener() {
+        bootstrapButton5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(0);
@@ -319,7 +319,7 @@ public class Datos extends AppCompatActivity {
                 new getComunas().execute(urlComunas + usuario);
                 setDatosSincronizacion();
             }
-        });*/
+        });
 
         if(savedInstanceState != null){
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Datos.this);
